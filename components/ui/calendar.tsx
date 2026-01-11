@@ -11,6 +11,7 @@ import {
   getDefaultClassNames,
   type DayButton,
 } from "react-day-picker";
+import { ptBR } from "date-fns/locale/pt-BR";
 
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -41,9 +42,12 @@ function Calendar({
       captionLayout={captionLayout}
       formatters={{
         formatMonthDropdown: (date) =>
-          date.toLocaleString("default", { month: "short" }),
+          date.toLocaleString("pt-BR", { month: "short" }),
+        formatWeekdayName: (date) =>
+          date.toLocaleDateString("pt-BR", { weekday: "short" }),
         ...formatters,
       }}
+      locale={ptBR}
       classNames={{
         root: cn("w-fit", defaultClassNames.root),
         months: cn(

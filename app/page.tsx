@@ -28,7 +28,7 @@ export default function HomePage() {
               Digite seu e-mail abaixo para fazer login na sua conta.
             </CardDescription>
             <CardAction>
-              <Link href="/register-page">
+              <Link href="/register-page" className="cursor-pointer">
                 <Button variant="link" className="cursor-pointer">
                   Cadastre-se
                 </Button>
@@ -51,12 +51,12 @@ export default function HomePage() {
                 <div className="grid gap-2">
                   <div className="flex items-center">
                     <Label htmlFor="password">Senha</Label>
-                    <a
-                      href="#"
-                      className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                    <Link
+                      className="ml-auto inline-block text-sm underline-offset-4 hover:underline cursor-pointer"
+                      href="/forgot-password"
                     >
                       Esqueceu sua senha?
-                    </a>
+                    </Link>
                   </div>
                   <Input
                     id="password"

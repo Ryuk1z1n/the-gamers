@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 import { Metadata } from "next";
+import Link from "next/dist/client/link";
 
 export const metadata: Metadata = {
   title: "Registro",
@@ -100,6 +101,12 @@ export default function RegisterPage() {
             <Button variant="outline" className="w-full">
               Entrar com Google
             </Button>
+            <Link
+              href="/"
+              className="text-sm underline-offset-4 hover:underline cursor-pointer"
+            >
+              Já possuo uma conta
+            </Link>
           </CardFooter>
         </Card>
       </div>
