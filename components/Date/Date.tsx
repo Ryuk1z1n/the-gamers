@@ -25,6 +25,19 @@ function formatDate(date: Date | undefined) {
   });
 }
 
+function formatDateForInput(date: Date | undefined) {
+  if (!date) {
+    return "";
+  }
+
+  // Formato YYYY-MM-DD para o input type="date"
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
 function isValidDate(date: Date | undefined) {
   if (!date) {
     return false;
@@ -32,13 +45,67 @@ function isValidDate(date: Date | undefined) {
   return !isNaN(date.getTime());
 }
 
-export function Calendar28() {
+interface Calendar28Props {
+  value?: string; // Valor no formato YYYY-MM-DD
+  onChange?: (date: string) => void; // Retorna a data no formato YYYY-MM-DD
+  disabled?: boolean;
+}
+
+export function Calendar28({
+  value = "",
+  onChange,
+  disabled = false,
+}: Calendar28Props) {
   const [open, setOpen] = React.useState(false);
+
+  // Converte a string para Date
+  const getDateFromValue = (dateString: string): Date | undefined => {
+    if (!dateString) return undefined;
+    const date = new Date(dateString);
+    return isValidDate(date) ? date : undefined;
+  };
+
   const [date, setDate] = React.useState<Date | undefined>(
-    new Date("2025-06-01")
+    getDateFromValue(value)
   );
   const [month, setMonth] = React.useState<Date | undefined>(date);
-  const [value, setValue] = React.useState(formatDate(date));
+  const [displayValue, setDisplayValue] = React.useState(formatDate(date));
+
+  // Atualiza quando o valor externo muda
+  React.useEffect(() => {
+    const newDate = getDateFromValue(value);
+    setDate(newDate);
+    setMonth(newDate);
+    setDisplayValue(formatDate(newDate));
+  }, [value]);
+
+  const handleDateSelect = (selectedDate: Date | undefined) => {
+    setDate(selectedDate);
+    setDisplayValue(formatDate(selectedDate));
+
+    // Notifica o componente pai com a data no formato YYYY-MM-DD
+    if (selectedDate && onChange) {
+      const formattedDate = formatDateForInput(selectedDate);
+      onChange(formattedDate);
+    }
+
+    setOpen(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    setDisplayValue(inputValue);
+
+    // Tenta parsear a data digitada
+    const parsedDate = new Date(inputValue);
+    if (isValidDate(parsedDate)) {
+      setDate(parsedDate);
+      setMonth(parsedDate);
+      if (onChange) {
+        onChange(formatDateForInput(parsedDate));
+      }
+    }
+  };
 
   return (
     <div className="grid gap-2">
@@ -47,24 +114,18 @@ export function Calendar28() {
       </Label>
       <div className="relative">
         <Input
-          id="date"
-          value={value}
-          placeholder="June 01, 2025"
+          id="birthDate"
+          value={displayValue}
+          placeholder="01 de junho de 2025"
           className="bg-background pr-10"
-          onChange={(e) => {
-            const date = new Date(e.target.value);
-            setValue(e.target.value);
-            if (isValidDate(date)) {
-              setDate(date);
-              setMonth(date);
-            }
-          }}
+          onChange={handleInputChange}
           onKeyDown={(e) => {
             if (e.key === "ArrowDown") {
               e.preventDefault();
               setOpen(true);
             }
           }}
+          disabled={disabled}
         />
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
@@ -72,6 +133,7 @@ export function Calendar28() {
               id="date-picker"
               variant="ghost"
               className="absolute inset-y-0 right-0 size-9 flex items-center justify-center"
+              disabled={disabled}
             >
               <CalendarIcon className="size-3.5" />
               <span className="sr-only">Select date</span>
@@ -89,11 +151,14 @@ export function Calendar28() {
               captionLayout="dropdown"
               month={month}
               onMonthChange={setMonth}
-              onSelect={(date) => {
-                setDate(date);
-                setValue(formatDate(date));
-                setOpen(false);
+              onSelect={handleDateSelect}
+              disabled={(date) => {
+                // Desabilita datas futuras (não pode nascer no futuro)
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                return date > today;
               }}
+              initialFocus
             />
           </PopoverContent>
         </Popover>
